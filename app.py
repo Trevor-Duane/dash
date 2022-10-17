@@ -1,40 +1,22 @@
 from dash import Dash, dcc, html, Input, Output
-import plotly.express as px
 import plotly.graph_objects as gp
-
 import pandas as pd
+import MySQLdb
+import mysql.connector
+from sqlalchemy import create_engine
 
 app = Dash(__name__)
 
-csv_files = [
-    '2014',
-    '2015',
-    '2016',
-    '2017',
-    '2018',
-    '2019',
-    '2020',
-    '2021',
-    '2022',
-    '2023',
-    '2024',
-    '2025',
-    '2026',
-    '2027',
-    '2028',
-    '2029',
-    '2030',
-    '2031',
-    '2032',
-    '2033',
-    '2034',
-    '2035',
-    '2036',
-    '2037',
-    '2038',
-    '2039',
-    '2040'
-]
+conn = mysql.connector.connect(host="localhost",database="population",user="root",password="Computers1996." )
+cursor = conn.cursor()
+cursor.execute("SELECT Distinct Year FROM popdata")
+years = []
+for row in cursor:
+    for field in row:
+        int(field)
+        years.append('{}'.format(field))
+
+# print(years)
 
 app.layout = html.Div(
     [
@@ -43,7 +25,7 @@ app.layout = html.Div(
         dcc.Dropdown(
             id='select_year',
             options=[
-                {'label': x, 'value': x} for x in csv_files
+                {'label': x, 'value': x} for x in years
             ],
             value='2014',
             searchable=True,
@@ -72,11 +54,11 @@ app.layout = html.Div(
 
 def update_output(value):
     if value:
-        filepath = "./data/"
-        currfile = filepath + value + "_pop.csv"
-        df = pd.read_csv(currfile, engine='python')
-        data = df.copy()
-        # print(data)
+        varY = value 
+        my_conn = create_engine("mysql+mysqldb://root:Computers1996.@localhost/population")
+        query="SELECT Age, Male, Female from popdata WHERE Year={varYear}".format(varYear = varY)    
+        data = pd.read_sql(query,my_conn)
+        print(data)
 
         container = html.P("Your are viewing population graph Date of {}".format(value), style={'margin':'2px 0px 2px 40px'})
 
